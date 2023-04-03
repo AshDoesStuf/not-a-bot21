@@ -171,10 +171,10 @@ export async function runTurn(bot) {
       didSomething = await handlePlacingBlocks(bot, rgCtfUtils, opponents, teamMates)
     }
 
-    if (!didSomething) {
-      // see if we can find some items to loot
-      didSomething = await handleLootingItems(bot, rgCtfUtils, opponents, teamMates)
-    }
+    // if (!didSomething) {
+    //   // see if we can find some items to loot
+    //   didSomething = await handleLootingItems(bot, rgCtfUtils, opponents, teamMates)
+    // }
 
     if (!didSomething) {
       // we had nothing to do ... move towards the middle

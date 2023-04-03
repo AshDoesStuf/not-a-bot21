@@ -24,5 +24,17 @@
     "rg-ctf-utils": "1.0.5",
     "rg-match-info": "1.1.0",
     "vec3": "0.1.7"
-  }
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AshDoesStuf/not-a-bot21.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AshDoesStuf/not-a-bot21/issues"
+  },
+  "homepage": "https://github.com/AshDoesStuf/not-a-bot21#readme"
 }
