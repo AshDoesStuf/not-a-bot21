@@ -42,89 +42,30 @@ export function configureBot(bot) {
   rgCtfUtils = new RGCTFUtils(bot)
   rgCtfUtils.setDebug(true)
 
-  // Load the armor-manager plugin (https://github.com/PrismarineJS/MineflayerArmorManager)
   bot.mineflayer().loadPlugin(armorManager)
 
-  /**
-   * Information about the unbreakable block types
-   * @type {number[]}
-   */
   unbreakable = getUnbreakableBlockIds(bot)
-  console.log(`Unbreakable blocks: ${JSON.stringify(unbreakable)}`)
-
-
-  /**
-   * Listeners for key events.  This bot uses these for logging information for debugging.
-   * You may use these for actions, but this main loop bot does not
-   */
-  bot.on('match_ended', async (matchInfo) => {
-
-    /** @type {number | undefined} */
-    const points = matchInfo?.players.find(player => player.username === bot.username())?.metadata?.score
-    /** @type {number | undefined} */
-    const captures = matchInfo?.players.find(player => player.username === bot.username())?.metadata?.flagCaptures
-    console.log(`The match has ended - I had ${captures} captures and scored ${points} points`)
-  })
-
-  bot.on('match_started', async (matchInfo) => {
-    console.log(`The match has started`)
-  })
-
-  bot.on(CTFEvent.FLAG_OBTAINED, async (collector) => {
-    console.log(`Flag picked up by ${collector}`)
-    if (collector === bot.username()) {
-      console.log('I have the flag... yippee !!!')
-    }
-  })
-
-  bot.on(CTFEvent.FLAG_SCORED, async (teamName) => {
-    console.log(`Flag scored by ${teamName} team`)
-  })
-
-  bot.on(CTFEvent.FLAG_AVAILABLE, async (position) => {
-    console.log('Flag is available')
-  })
 }
 
 /**
- * @param {RGBot} bot The configurable RGBot
+ * @param {RGBot} bot 
  */
 export async function runTurn(bot) {
 
   try {
-    /**
-     * find out which team I'm on
-     * @type {string}
-     */
     const myTeamName = bot.getMyTeam()
 
-    /**
-     * find my current position
-     * @type {Vec3}
-     */
     const myPosition = bot.position()
 
-    // then log information about my state
-    console.log(`My team: ${myTeamName}, my position: ${bot.vecToString(myPosition)}, my inventory: ${JSON.stringify(bot.getAllInventoryItems().map((item) => nameForItem(item)))}`)
-
-    /**
-     * find any teammates in range
-     * @type {Entity[]}
-     */
     const teamMates = nearestTeammates(bot, 33, true)
 
-    // find any opponents within range
-    /** @type {string[]} */
     const opponentNames = bot.getOpponentUsernames()
-    /** @type {Entity[]} */
+
     const opponents = bot.findEntities({
-      // opNames can be empty in practice mode where there is no other team
-      // if we don't pass some array to match, then this will return all entities instead
       entityNames: (opponentNames.length === 0 && ['...']) || opponentNames,
       attackable: true,
       maxCount: 3,
-      maxDistance: 33, // Bots can only see ~30 +/1 blocks, so no need to search far
-      // override the default value function here as we aren't using this value in the sortValueFunction
+      maxDistance: 33, 
       entityValueFunction: (entityName) => {
         return 0
       },
@@ -134,11 +75,8 @@ export async function runTurn(bot) {
       }
     }).map(fr => fr.result)
 
-    // equip my best armor
     bot.mineflayer().armorManager.equipAll()
 
-    // Only take 1 action per main loop pass.  There are exceptions, but this is best practice as the
-    // game server can only process so many actions per tick
     let didSomething = false
 
     if (!didSomething) {
@@ -165,16 +103,6 @@ export async function runTurn(bot) {
       // go pickup the loose flag
       didSomething = await handleCollectingFlag(bot, rgCtfUtils, opponents, teamMates)
     }
-
-    if (!didSomething) {
-      // If no-one within N blocks, place blocks
-      didSomething = await handlePlacingBlocks(bot, rgCtfUtils, opponents, teamMates)
-    }
-
-    // if (!didSomething) {
-    //   // see if we can find some items to loot
-    //   didSomething = await handleLootingItems(bot, rgCtfUtils, opponents, teamMates)
-    // }
 
     if (!didSomething) {
       // we had nothing to do ... move towards the middle
