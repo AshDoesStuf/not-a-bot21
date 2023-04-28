@@ -43,8 +43,6 @@ export function configureBot(bot) {
   rgCtfUtils.setDebug(true)
 
   bot.mineflayer().loadPlugin(armorManager)
-
-  unbreakable = getUnbreakableBlockIds(bot)
 }
 
 /**
@@ -78,11 +76,6 @@ export async function runTurn(bot) {
     bot.mineflayer().armorManager.equipAll()
 
     let didSomething = false
-
-    if (!didSomething) {
-      // Check if I'm low on health
-      didSomething = await handleLowHealth(bot, rgCtfUtils, opponents, teamMates)
-    }
 
     if (!didSomething) {
       // if someone has the flag, hunt down player with flag if it isn't a team-mate
